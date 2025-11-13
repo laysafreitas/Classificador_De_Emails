@@ -40,7 +40,7 @@ MODEL_GENERATOR = "google/flan-t5-large"
 generator = pipeline("text2text-generation", model=MODEL_GENERATOR)
 
 
-stop_words = set(stopwords.words('English')) 
+stop_words = set(stopwords.words('portuguese')) 
 
 
 class EmailInput(BaseModel):
@@ -81,29 +81,56 @@ def classify_productivity(processed_text: str) -> str:
         return "Indeterminado"
 
 def generate_response(classification: str, original_email: str) -> str:
-    
+ 
+    if 'subject:' in original_email.lower():
+        clean_email = re.sub(r'Subject:.*?\n', '', original_email, flags=re.IGNORECASE)
+    else:
+        clean_email = original_email
+
     if classification == "Produtivo":
         prompt = (
             f"O seguinte e-mail foi classificado como PRODUTIVO. "
             f"Gere uma resposta profissional, concisa e de acompanhamento. "
-            f"E-mail: '{original_email}'"
+            f"E-mail: '{original_email}'\nResposta Sugerida:"
         )
     elif classification == "Improdutivo":
         prompt = (
             f"O seguinte e-mail foi classificado como IMPRODUTIVO ou SPAM. "
             f"Gere uma resposta educada e formal que decline a solicitação ou que a encaminhe para o canal correto. "
-            f"E-mail: '{original_email}'"
+            f"E-mail: '{original_email}\n'"
+            f"Resposta Sugerida:"
         )
     else:
         return "Não foi possível gerar uma resposta automática devido à classificação indeterminada."
 
     try:
-       response = generator(prompt, max_new_tokens=150)[0]["generated_text"]
-       return response.strip()
+        response_data = generator(
+            prompt, 
+            max_new_tokens=300,
+            do_sample=True,             
+            temperature=0.7,            
+            num_return_sequences=1      
+        )
+        
+        response = response_data[0]["generated_text"]
+
+        text_to_check = f"E-mail: {clean_email}".strip().lower()
+
+        normalized_response = response.strip().lower()
+
+        if normalized_response.startswith(text_to_check[:min(len(text_to_check), 50)]):
+             
+            response = response[len(text_to_check):].strip()
+
+        
+        response = re.sub(r'^\s*Resposta:\s*', '', response, flags=re.IGNORECASE).strip()
+        response = response.strip("'\"") 
+        
+        
+        return response.strip()
+        
     except Exception as e:
-        return f"Erro ao gerar resposta: {e}"
-
-
+        return f"Erro ao gerar resposta automática: {e}"
 @app.post("/process_email/", response_model=EmailOutput)
 async def process_email(email: EmailInput):
 
