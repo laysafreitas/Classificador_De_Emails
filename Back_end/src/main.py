@@ -128,7 +128,7 @@ if __name__ == "__main__":
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_home():
-    file_path = os.path.join("Front_end", "Index.html")
+    file_path = os.path.join("Front_end", "index.html")
     with open(file_path, "r", encoding="utf-8") as f:
         html_content = f.read()
     return html_content
