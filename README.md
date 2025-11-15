@@ -117,7 +117,7 @@ Este projeto está licenciado sob a MIT License
 ## 👩‍💻 Autora
 ###Laysa Freitas
 - 💼 Desenvolvedora Backend | Entusiasta em IA e FastAPI
-- 📧 Contato: [Seu e-mail ou LinkedIn]
+- 📧 Contato: freitaslaysa93@gmail.com
 
 
 
