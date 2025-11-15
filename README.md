@@ -79,8 +79,8 @@ Classificador_De_Emails/
 │
 ├── Front_end/
 │   ├── Index.html
-│   ├── Email.css
-│   └── script.js
+│   ├── App.css
+│   └── App.js
 │
 ├── README.md
 └── LICENSE
